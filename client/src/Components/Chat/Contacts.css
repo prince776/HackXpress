@@ -1,0 +1,11 @@
+#contactsDiv {
+    /* height:80vh */
+}
+
+div{    
+    /* border:1px solid black */
+}
+
+.contact a:hover{
+    background-color: darkgray;
+}

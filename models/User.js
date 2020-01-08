@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+var Chat = new mongoose.Schema({
+    content: {
+        type: String
+    },
+    sender: {
+        type: String
+    }
+
+})
+
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -26,6 +36,12 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    contacts: [{
+        type: String
+    }],
+    chats: [{
+        type: Chat
+    }]
 });
 
 //methods
