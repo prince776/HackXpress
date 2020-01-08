@@ -170,8 +170,10 @@ class Chat extends Component {
                             <h3>Welcome to Xpress Chat.</h3>
                             <h4>Find users, add them to contacts and chat with AI enchanced experience</h4>
 
+
                             <h6>{this.state.message}</h6>
                         </div>
+
                     </div>
                 </div>
             )

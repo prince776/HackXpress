@@ -24,7 +24,7 @@ class Header extends Component {
                         <strong><span className='text-dark'>X</span>press Chat</strong>
                     </h1>
                 </div>
-
+                <img src='favicon.ico' className="img-fluid float-right mt-4 " ></img>
             </div>
         )
 

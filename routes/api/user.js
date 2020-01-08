@@ -1,6 +1,8 @@
 var User = require('../../models/User.js')
 var UserSession = require('../../models/UserSession.js')
 
+
+
 var sendError = (res, errFront, errBack) => {
     if (!errBack) errBack = errFront;
     console.log('Error:' + errBack)

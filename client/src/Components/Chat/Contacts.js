@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 
 import './Contacts.css'
+import { Redirect } from 'react-router';
 
 class Contacts extends Component {
 
@@ -13,7 +14,8 @@ class Contacts extends Component {
             toSearch: '',
             usersSearched: [],
             refreshContacts: false,
-            highlightUser: ''
+            highlightUser: '',
+            redirect: '',
         }
     }
 
@@ -73,8 +75,28 @@ class Contacts extends Component {
         this.props.setSelectedUser(user)
     }
 
+    onSignOut = () => {
+
+        this.props.axiosInstance.post('/api/account/signout').then(res => {
+            if (!res.data.success) {
+                this.setState({
+                    message: res.data.message
+                })
+            } else {
+                this.setState({
+                    redirect: '/'
+                })
+            }
+        })
+
+    }
+
     render() {
-        var { contacts, usersSearched } = this.state;
+        var { contacts, usersSearched, redirect } = this.state;
+
+        if (redirect) {
+            return <Redirect to={redirect} />
+        }
 
         return (
             <div className='col-md-2 col-sm-4 mt-4 navbar bg-light navbar-light overflow-auto mh-10 ' id='contactsDiv'>
@@ -93,6 +115,7 @@ class Contacts extends Component {
 
                     <li className='nav-item'>
                         <button className='btn btn-dark' onClick={this.onSearch}>Search</button>
+                        <button className='btn btn-dark ml-3' onClick={this.onSignOut}>Sign Out</button>
                     </li>
 
                     <hr />
