@@ -27,10 +27,39 @@ module.exports = (app) => {
 
                 users = docs.map(doc => doc.username)
 
-                return res.send({
-                    success: true,
-                    users: users
+                const sessionToken = req.cookies.sessionToken;
+                UserSession.find({
+                    _id: sessionToken,
+                    isDeleted: false,
+                }, (err, previousSessions) => {
+                    if (err) return sendError(res, "Server Error", err);
+                    if (previousSessions.length < 1) return sendError(res, "Session Expired");
+
+                    var userID = previousSessions[0].userID;
+
+                    User.find({
+                        _id: userID,
+                        isDeleted: false
+                    }, (err, previousUsers) => {
+                        if (err) return sendError(res, "Server error", err)
+                        if (previousUsers.length < 1) return sendError(res, 'User doesn\'t exists')
+
+                        var username = previousUsers[0].username;
+
+                        if (users.indexOf(username) != -1) {
+                            users = users.filter(user => user != username)
+                            console.log('removing', username)
+                        }
+                        return res.send({
+                            success: true,
+                            users: users
+                        })
+
+                    })
+
                 })
+
+
 
             });
 

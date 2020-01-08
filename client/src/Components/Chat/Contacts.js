@@ -38,7 +38,6 @@ class Contacts extends Component {
 
     onSearch = () => {
         const { toSearch } = this.state;
-        console.log(toSearch)
         this.props.axiosInstance.post('/api/utils/search', {
             toSearch: toSearch
         }).then(res => {
@@ -78,7 +77,7 @@ class Contacts extends Component {
         var { contacts, usersSearched } = this.state;
 
         return (
-            <div className='col-md-2 col-sm-4 mt-4 navbar bg-light navbar-light overflow-auto' id='contactsDiv'>
+            <div className='col-md-2 col-sm-4 mt-4 navbar bg-light navbar-light overflow-auto mh-10 ' id='contactsDiv'>
 
                 <ul className="navbar-nav">
 

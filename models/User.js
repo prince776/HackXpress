@@ -7,6 +7,9 @@ var Chat = new mongoose.Schema({
     },
     sender: {
         type: String
+    },
+    to: {
+        type: String
     }
 
 })

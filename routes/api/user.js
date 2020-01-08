@@ -228,4 +228,104 @@ module.exports = (app) => {
 
     })
 
+    app.post('/api/account/sendChat', (req, res) => {
+
+        const sessionToken = req.cookies.sessionToken;
+
+        var { to, chatMessage } = req.body;
+
+        UserSession.find({
+            _id: sessionToken,
+            isDeleted: false,
+        }, (err, previousSessions) => {
+            if (err) return sendError(res, "Server Error", err);
+            if (previousSessions.length < 1) return sendError(res, "Session Expired");
+
+            var userID = previousSessions[0].userID;
+
+            User.find({
+                _id: userID,
+                isDeleted: false
+            }, (err, previousUsers) => {
+                if (err) return sendError(res, "Server error", err)
+                if (previousUsers.length < 1) return sendError(res, 'User doesn\'t exists')
+
+                var user = previousUsers[0]
+
+                var newChat = {
+                    content: chatMessage,
+                    sender: user.username,
+                    to: to
+                }
+
+                user.chats = user.chats.concat([newChat])
+
+                User.find({
+                    username: to,
+                    isDeleted: false
+                }, (err, previousUsersU) => {
+                    if (err) return sendError(res, "Server Error", err)
+                    if (previousUsersU.length < 1) return sendError(res, "User not found")
+
+                    var receiever = previousUsersU[0];
+                    receiever.chats = receiever.chats.concat([newChat])
+                    receiever.save((err, doc) => {
+                        if (err) return sendError(res, "Server Error", err);
+                    })
+
+                })
+
+                user.save((err, doc) => {
+                    if (err) return sendError(res, "Server Error", err);
+
+                    return res.send({
+                        success: true,
+                        message: 'message sent successfully',
+                        newChat: newChat
+                    })
+                })
+
+            })
+
+        })
+
+    })
+
+    app.post('/api/account/getChat', (req, res) => {
+        const sessionToken = req.cookies.sessionToken;
+        var { contact } = req.body;
+
+        UserSession.find({
+            _id: sessionToken,
+            isDeleted: false,
+        }, (err, previousSessions) => {
+            if (err) return sendError(res, "Server Error", err);
+            if (previousSessions.length < 1) return sendError(res, "Session Expired");
+
+            var userID = previousSessions[0].userID;
+
+            User.find({
+                _id: userID,
+                isDeleted: false
+            }, (err, previousUsers) => {
+                if (err) return sendError(res, "Server error", err)
+                if (previousUsers.length < 1) return sendError(res, 'User doesn\'t exists')
+
+                var user = previousUsers[0]
+
+                var chats = user.chats;
+
+                var reqChats = chats.filter(chat => chat.sender == contact || chat.to == contact)
+
+
+                return res.send({
+                    success: true,
+                    chats: reqChats
+                })
+
+            })
+
+        })
+    })
+
 }
