@@ -4,6 +4,9 @@ import Contacts from './Contacts.js'
 
 import './Chat.css'
 
+import * as toxicity from '@tensorflow-models/toxicity';
+
+
 class Chat extends Component {
 
     constructor(props) {
@@ -14,7 +17,12 @@ class Chat extends Component {
             isContact: false,
             message: '',
             chatMessage: '',
-            chatMessages: []
+            chatMessages: [],
+
+            predictionConfidenceThreshold: 0.9,
+            model: '',
+            toxic: false,
+            toxicityType: ''
         }
     }
 
@@ -69,7 +77,29 @@ class Chat extends Component {
             })
         }
 
+        this.loadModel().then(model => {
+            console.log("Model Loaded")
+        });
+
     }
+    loadModel = async () => {
+        this.setState({
+            model: await toxicity.load(this.state.predictionConfidenceThreshold)
+        })
+    }
+
+    classify = async (inputs) => {
+        var { model } = this.state;
+
+        const results = await model.classify(inputs);
+        return inputs.map((d, i) => {
+            const obj = { 'text': d };
+            results.forEach((classification) => {
+                obj[classification.label] = classification.results[i].match;
+            });
+            return obj;
+        });
+    };
 
     addToContacts = () => {
 
@@ -88,6 +118,16 @@ class Chat extends Component {
 
     }
 
+    checkToxicity = async () => {
+        this.setState({
+            message: 'Checking...'
+        })
+        var toxic = await this.classify([this.state.chatMessage]).then(obj => {
+            if (obj[0].toxicity) this.setState({ message: "Message is toxic" })
+            else this.setState({ message: "Message is suitable for conversations" })
+        })
+    }
+
     sendMessage = () => {
 
         var { chatMessage } = this.state;
@@ -102,6 +142,7 @@ class Chat extends Component {
                 this.setState({
                     chatMessages: this.state.chatMessages.concat([newChat]),
                     chatMessage: '',
+                    message: ''
                 })
             } else {
                 this.setState({
@@ -168,14 +209,19 @@ class Chat extends Component {
                         <div className='col-md-9 bg-light border border-dark mt-4 ml-4'>
 
                             <div className='row pt-3'>
-                                <div className="form-group col-md-10 ">
+                                <div className="form-group col-md-8 ">
                                     <input type="text" name='chatMessage' value={this.state.chatMessage} onChange={this.onChatInputChange} className="form-control" placeholder="Send Message" />
                                 </div>
 
-                                <div className='col-md-2 text-center'>
+                                <div className='col-md-3 text-center'>
                                     <button className='btn btn-dark ' onClick={this.sendMessage} >Send</button>
+                                    <button className='btn btn-dark m-3' onClick={this.checkToxicity} >Check suitablity</button>
+
                                 </div>
+                                <h6 className='m-2'>{this.state.message}</h6>
+
                             </div>
+
                             <hr />
 
                             <div className='row text-white' id='chatbox'>
@@ -198,7 +244,6 @@ class Chat extends Component {
 
                                 ))}
 
-                                <h6>{this.state.message}</h6>
                             </div>
 
 
